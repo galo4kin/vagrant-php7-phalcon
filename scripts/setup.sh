@@ -2,46 +2,42 @@
 # Using Ubuntu
 
 sudo echo "127.0.1.1 ubuntu-xenial" >> /etc/hosts
+
 #
 # Install
 #
-echo "============    BEGIN SETUP   ============="
 echo -e "----------------------------------------"
-sudo apt-get install -y language-pack-UTF-8
-sudo apt-get install -y build-essential python-software-properties software-properties-common
-sudo apt-get update
-sudo apt-get install -y re2c libpcre3-dev gcc make
-
+echo -e "============    BEGIN SETUP   ============="
+sudo apt-get update > /dev/null
+sudo apt-get install -y language-pack-ru-base language-pack-ru build-essential python-software-properties software-properties-common re2c libpcre3-dev gcc make > /dev/null
 
 #
 # Install Git and Tools
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Git"
-apt-get install -y git  > /dev/null
+echo -e "VAGRANT ==> Git"
+sudo apt-get install -y git  > /dev/null
 
 echo -e "----------------------------------------"
-echo "VAGRANT ==> tools (mc, htop, unzip etc...)"
-apt-get install -y mc htop unzip grc gcc make libpcre3 libpcre3-dev lsb-core autoconf > /dev/null
-
-
+echo -e "VAGRANT ==> Tools (mc, htop, unzip etc...)"
+sudo apt-get install -y mc htop unzip grc gcc make libpcre3 libpcre3-dev lsb-core autoconf > /dev/null
 
 #
 # Install Nginx
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Nginx"
-apt-get install -y nginx  > /dev/null
-
+echo -e "VAGRANT ==> Nginx"
+sudo apt-get install -y nginx  > /dev/null
 
 #
 # Nginx host
 #
 echo -e "----------------------------------------"
+echo -e "VAGRANT ==> Setup Nginx"
 sudo rm -rf /etc/nginx/sites-available/default
 sudo rm -rf /etc/nginx/sites-enabled/default
-echo "VAGRANT ==> Setup Nginx"
 cd ~
+# shellcheck disable=SC2016
 echo 'server {
     index    index.php index.html index.htm;
     set      $basepath "/vagrant/www";
@@ -108,121 +104,116 @@ echo 'server {
 }' > devhosts
 
 #
-# enable host
+# Enable host
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> HOST file"
+echo -e "VAGRANT ==> /etc/nginx/sites-available/devhosts"
 sudo mv ~/devhosts /etc/nginx/sites-available/devhosts
 sudo ln -s /etc/nginx/sites-available/devhosts /etc/nginx/sites-enabled/devhosts
-sudo service nginx restart > /dev/null
+sudo service nginx restart
 
 #
-# php
+# PHP 7.3
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> PHP 7"
-sudo apt-get install -y php7.0-fpm php7.0-cli php7.0-common php7.0-json php7.0-opcache php7.0-mysql php7.0-phpdbg php7.0-mbstring php7.0-gd php-imagick  php7.0-pgsql php7.0-pspell php7.0-recode php7.0-tidy php7.0-dev php7.0-intl php7.0-gd php7.0-curl php7.0-zip php7.0-xml php-memcached mcrypt memcached phpunit
-
+echo -e "VAGRANT ==> PHP 7.3"
+sudo add-apt-repository -y ppa:ondrej/php  > /dev/null
+sudo apt-get update > /dev/null
+sudo apt-get install -y php7.3-fpm php7.3-cli php7.3-common php7.3-json php7.3-opcache php7.3-mysql php7.3-phpdbg php7.3-mbstring php7.3-gd php-imagick  php7.3-pgsql php7.3-pspell php7.3-recode php7.3-tidy php7.3-dev php7.3-intl php7.3-gd php7.3-curl php7.3-zip php7.3-xml php-memcached mcrypt memcached phpunit > /dev/null
 
 #
 # PHP Errors
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Setup PHP 7"
-sudo sed -i 's/short_open_tag = Off/short_open_tag = On/' /etc/php/7.0/fpm/php.ini
-sudo sed -i 's/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/' /etc/php/7.0/fpm/php.ini
-sudo sed -i 's/display_startup_errors = Off/display_startup_errors = On/' /etc/php/7.0/fpm/php.ini
-sudo sed -i 's/display_errors = Off/display_errors = On/' /etc/php/7.0/fpm/php.ini
-sudo sed -i 's/listen =/listen = 127.0.0.1:9000 ;/' /etc/php/7.0/fpm/pool.d/www.conf
-service php7.0-fpm restart
-
-
+echo -e "VAGRANT ==> Setup PHP 7.3"
+sudo sed -i 's/short_open_tag = Off/short_open_tag = On/' /etc/php/7.3/fpm/php.ini
+sudo sed -i 's/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/' /etc/php/7.3/fpm/php.ini
+sudo sed -i 's/display_startup_errors = Off/display_startup_errors = On/' /etc/php/7.3/fpm/php.ini
+sudo sed -i 's/display_errors = Off/display_errors = On/' /etc/php/7.3/fpm/php.ini
+sudo sed -i 's/listen =/listen = 127.0.0.1:9000 ;/' /etc/php/7.3/fpm/pool.d/www.conf
+sudo service php7.3-fpm restart
 
 #
-# composer
+# Ccomposer
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Composer"
+echo -e "VAGRANT ==> Composer"
 curl -sS https://getcomposer.org/installer | php > /dev/null
-mv composer.phar /usr/local/bin/composer
+sudo mv composer.phar /usr/local/bin/composer
 
 #
 # Frontend Tools (npm, nodejs, gulp)
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Frontend Tools (npm, nodejs, gulp)"
-sudo apt install -y npm nodejs nodejs-legacy
-sudo npm install --global gulp-cli gulp
+echo -e "VAGRANT ==> Frontend Tools (npm, nodejs, gulp)"
+curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash - > /dev/null
+sudo apt-get install -y nodejs > /dev/null
+sudo npm i --global gulp-cli gulp > /dev/null
 
 #
-# redis
+# Redis
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Redis Server"
-apt-get install -y redis-server redis-tools
-cp /etc/redis/redis.conf /etc/redis/redis.bkup.conf
-sed -i 's/bind 127.0.0.1/bind 0.0.0.0/' /etc/redis/redis.conf
+echo -e "VAGRANT ==> Redis Server"
+sudo apt-get install -y redis-server redis-tools  > /dev/null
+sudo cp /etc/redis/redis.conf /etc/redis/redis.bkup.conf
+sudo sed -i 's/bind 127.0.0.1/bind 0.0.0.0/' /etc/redis/redis.conf
 
 
 echo -e "----------------------------------------"
-echo "VAGRANT ==> PHP Redis"
+echo -e "VAGRANT ==> PHP Redis"
 git clone https://github.com/phpredis/phpredis.git
 cd phpredis
-git checkout php7
+git checkout tags/5.2.0/dev/null
 phpize
 ./configure
-make && make install
+sudo make && sudo make install > /dev/null
 cd ..
 rm -rf phpredis
 cd ~/
 echo "extension=redis.so" > ~/redis.ini
-cp ~/redis.ini /etc/php/7.0/mods-available/redis.ini
-ln -s /etc/php/7.0/mods-available/redis.ini /etc/php/7.0/fpm/conf.d/20-redis.ini
+sudo mv ~/redis.ini /etc/php/7.3/mods-available/redis.ini
+sudo ln -s /etc/php/7.3/mods-available/redis.ini /etc/php/7.3/fpm/conf.d/20-redis.ini
 
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Restart Redis & PHP"
-service redis-server restart
-service php7.0-fpm restart
-
+echo -e "VAGRANT ==> Restart Redis & PHP"
+sudo service redis-server restart
+sudo service php7.3-fpm restart
 
 #
-# MySQL
+# MySQL 5.7
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> MySQL"
-export DEBIAN_FRONTEND=noninteractive
-apt-get install -y debconf-utils -y > /dev/null
+echo -e "VAGRANT ==> MySQL 5.7"
+sudo apt-get install -y debconf-utils -y > /dev/null
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root'
-sudo apt install -y mysql-server mysql-client
-sed -i 's/bind-address/bind-address = 0.0.0.0#/' /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo apt-get install -y mysql-server-5.7 mysql-client-5.7 > /dev/null
+sudo sed -i 's/bind-address/bind-address = 0.0.0.0#/' /etc/mysql/mysql.conf.d/mysqld.cnf
 mysql -u root -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION; FLUSH PRIVILEGES;"
-service mysql restart
-
+sudo service mysql restart
 
 #
-# Phalcon PHP Framework 3
+# Phalcon PHP Framework 4
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Setup Phalcon Framework 3"
+echo -e "VAGRANT ==> Setup Phalcon Framework 4"
 cd ~/
-sudo apt-add-repository ppa:phalcon/stable
-sudo apt-get update
-sudo apt-get install -y php7.0-phalcon
-echo 'extension=phalcon.so' > /etc/php/7.0/mods-available/phalcon.ini
-ln -s /etc/php/7.0/mods-available/phalcon.ini /etc/php/7.0/fpm/conf.d/20-phalcon.ini
-
-
+curl -s https://packagecloud.io/install/repositories/phalcon/stable/script.deb.sh | sudo bash > /dev/null
+sudo apt-get update > /dev/null
+sudo apt-get install -y php-psr php7.3-phalcon
+#sudo echo 'extension=psr.so' > /etc/php/7.3/mods-available/psr.ini
+#sudo echo 'extension=phalcon.so' > /etc/php/7.3/mods-available/phalcon.ini
+sudo ln -s /etc/php/7.3/mods-available/psr.ini /etc/php/7.3/fpm/conf.d/19-psr.ini
+sudo ln -s /etc/php/7.3/mods-available/phalcon.ini /etc/php/7.3/fpm/conf.d/20-phalcon.ini
 
 #
 # Reload servers
 #
 echo -e "----------------------------------------"
-echo "VAGRANT ==> Restart Nginx & PHP-FPM"
+echo -e "VAGRANT ==> Restart Nginx & PHP-FPM"
 sudo service nginx restart
-sudo service php7.0-fpm restart
-
-
+sudo service php7.3-fpm restart
 
 #
 # Add user to group
@@ -230,9 +221,9 @@ sudo service php7.0-fpm restart
 sudo usermod -a -G www-data vagrant
 
 #
-# COMPLETE
+# Complete
 #
 echo -e "----------------------------------------"
-echo "======>  VIRTUAL MACHINE READY"
-echo "======>  TYPE 'vagrant ssh"
+echo -e "======>  VIRTUAL MACHINE READY"
+echo -e "======>  TYPE 'vagrant ssh' and be happy!"
 echo -e "----------------------------------------"

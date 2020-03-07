@@ -1,11 +1,11 @@
-# Ubuntu 16.04 Vagrant VM: Phalcon 3 + PHP 7
+# Ubuntu 16.04 Vagrant VM: Phalcon 4 + PHP 7.3
 ![logo](http://i.imgur.com/rKZ8aq9.png)
 
 * Git
 * Nginx
-* PHP7
-* Phalcon
-* MySQL
+* PHP 7.3
+* Phalcon 4.0.4
+* MySQL 5.7
 * Redis
 * Composer
 * NodeJS
@@ -30,9 +30,11 @@
 
 # Development
 1. Go to `vagrant-php7-phalcon/www/`
-2. Make `directory/public` or `directory/public/index.php`
-3. Open url `http://directory.dev/`
-4. Enjoy :sunglasses:
+2. Make `$directory/public` or `$directory/public/index.php`
+3. Add `192.168.3.3 $directory.dev` to `/etc/host` file
+    1. For example add `192.168.3.3 hello.dev` and open `hello.dev` in browser
+4. Open url `http://$directory.dev/`
+5. Enjoy :sunglasses:
 
 # Domains
 * `domain.dev`
